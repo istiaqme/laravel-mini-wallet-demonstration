@@ -4,11 +4,15 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\AuthToken;
+use App\Interfaces\AuthServiceInterface;
 
 class NativeAuth
 {
+    private $authServiceInterface;
+
+    public function __construct(AuthServiceInterface $authServiceInterface){
+        $this->authServiceInterface = $authServiceInterface;
+    }
     /**
      * Handle an incoming request.
      *
@@ -19,30 +23,27 @@ class NativeAuth
     public function handle(Request $request, Closure $next)
     {
         // wildcard check
-        $authTokens = AuthToken::where('token', $request->header('authtoken'))->where('user_id', $request->header('userid'))->where('status', 'Active')->get();
-        if(count($authTokens) == 1) {
-            // user and wallet get validated here
-            $users = User::where('id', $request->header('userid'))->where('wallet_id', $request->header('walletid'))->get();
-            if(count($users) == 1) {
-                $request->current_balance = $users[0]->current_balance;
-                $request->currency = $users[0]->currency;
-                return $next($request);
-            }
-            else {
-                return response()->json([
-                    'type' => 'Error',
-                    'msg' => 'Authorization Denied',
-                    'data' => null
-                ], 200);
-            }
-            
-        }
-        else {
+        $validate = $this->authServiceInterface::authMiddleware([
+            "token" => $request->header('authtoken'),
+            "userId" => $request->header('userid'),
+            "walletId" => $request->header('walletid'),
+        ]);
+        if($validate['type'] == "Error"){
             return response()->json([
                 'type' => 'Error',
                 'msg' => 'Authorization Denied',
                 'data' => null
             ], 200);
         }
+        else {
+            // inject some global data in request object so that we can use in the future
+            $request->current_balance = $validate['data']['user']->current_balance;
+            $request->currency = $validate['data']['user']->currency;
+            return $next($request);
+        }
+
+
+
+
     }
 }

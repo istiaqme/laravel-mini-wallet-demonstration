@@ -114,5 +114,56 @@ class AuthService implements AuthServiceInterface
         
     }
 
+    public static function authMiddleware (array $data) : array
+    {
+        try{
+            // wildcard check
+            $authTokens = AuthToken::where('token', $data['token'])
+                ->where('user_id', $data['userId'])
+                ->where('status', 'Active')->get();
+
+            if(count($authTokens) == 1) {
+                // user and wallet get validated here
+                $users = User::where('id', $data['userId'])
+                    ->where('wallet_id', $data['walletId'])
+                    ->get();
+
+                if(count($users) == 1) {
+                    return [
+                        "type" => "Success",
+                        "data" => [
+                            "user" => $users[0]
+                        ]
+                    ];
+                }
+                else {
+                    return [
+                        "type" => "Error",
+                        "data" => [
+                            "msg" => "User Not Found"
+                        ]
+                    ];
+                }
+            }
+            else {
+                return [
+                    "type" => "Error",
+                    "data" => [
+                        "msg" => "User Not Found"
+                    ]
+                ];
+            }
+        }
+        catch(\Exception $e){
+            return [
+                "type" => "Error",
+                "data" => [
+                    "msg" => $e
+                ]
+            ];
+        }
+        
+    }
+
 
 }
