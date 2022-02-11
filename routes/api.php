@@ -17,10 +17,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\StatController;
 
 
 Route::post('/signup', [UserController::class, 'signup']);
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::post('/wallet/sendMoney', [WalletController::class, 'sendMoney'])->middleware('auth.native');
-Route::get('/wallet/transactions/{walletId}', [WalletController::class, 'transactions'])->middleware('auth.native');
+Route::middleware(['auth.native'])->group(function () {
+    /* I don't use route resources until it's binded by the SRS  */
+    Route::post('/wallet/sendMoney', [WalletController::class, 'sendMoney']);
+    Route::get('/wallet/transactions/{walletId}', [WalletController::class, 'transactions']);
+});
+
+
+
