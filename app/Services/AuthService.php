@@ -82,5 +82,37 @@ class AuthService implements AuthServiceInterface
         ];
     }
 
+    public static function logout (object $request) : array
+    {
+        try{
+            $authToken = AuthToken::where('user_id', $request->header('userid'))
+                ->where('token', $request->header('authtoken'))
+                ->first();
+            if($authToken){
+                $authToken->status = "Inactive";
+                $authToken->save();
+                return [
+                    "type" => "Success",
+                    "data" => null
+                ];
+            }
+            else {
+                return [
+                    "type" => "Success",
+                    "data" => null
+                ];
+            }
+        }
+        catch(\Exception $e){
+            return [
+                "type" => "Error",
+                "data" => [
+                    "msg" => $e
+                ]
+            ];
+        }
+        
+    }
+
 
 }

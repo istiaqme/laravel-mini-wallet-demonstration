@@ -46,4 +46,14 @@ class AuthController extends Controller
             }  
         }
     }
+
+    public function logout (Request $request) {
+        // required data already validated by middleware
+        $this->authServiceInterface->logout($request);
+        return response()->json([
+            'type' => 'Success',
+            'msg' => "Succesfully Logged Out.",
+            'data' => null
+        ], 200);
+    }
 }
