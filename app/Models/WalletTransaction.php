@@ -20,6 +20,7 @@ class WalletTransaction extends Model
         'to_wallet_currency',
         'to_wallet_current_balance',
         'received_at',
-        'purpose'
+        'purpose',
+        'amount_in_base_currency'
     ];
 }

@@ -28,6 +28,7 @@ class WalletService implements WalletServiceInterface
         }else {
             $conversionRate = $exchangedData['data']['rate'];
             $convertedAmount = $exchangedData['data']['convertedAmount']; // x100
+            $amountInBaseCurrency = $exchangedData['data']['amountInBaseCurrency']; // x100
 
             $fromWalletNativeAmountX100 = $data['from_wallet_native_amount'] * 100;
 
@@ -51,6 +52,7 @@ class WalletService implements WalletServiceInterface
             $newTransaction->to_wallet_current_balance = $targetWalletCurrentBalance;
             $newTransaction->received_at = Carbon::now();
             $newTransaction->purpose = $data['purpose'];
+            $newTransaction->amount_in_base_currency = $amountInBaseCurrency;
             $newTransaction->save();
             
             // update the senders current balance
@@ -127,7 +129,8 @@ class WalletService implements WalletServiceInterface
             "proceed" => true,
             "data" => [
                 "rate" => number_format((float)$conversionRate, 2, '.', '') * 100,
-                "convertedAmount" => number_format((float)$amountOfTargetCurrency, 2, '.', '') * 100
+                "convertedAmount" => number_format((float)$amountOfTargetCurrency, 2, '.', '') * 100,
+                "amountInBaseCurrency" => $amountOfFromCurrencyInUSD * 100
             ]
         ];
     }
