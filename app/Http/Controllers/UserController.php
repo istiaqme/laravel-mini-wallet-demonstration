@@ -19,7 +19,7 @@ class UserController extends Controller
 
     public function signup (Request $request ) {
         $validation = SignupValidator::validateUserData($request);
-        if(!$validation["proceed"]){
+        if(!$validation["proceed"]){ 
             return response()->json([
                 'type' => 'Error',
                 'msg' => $validation["msg"],
@@ -33,6 +33,8 @@ class UserController extends Controller
                 "password" => $request->password,
                 "currency" => $request->selectedCurrency
             ]);
+            
+
             return response()->json([
                 'type' => 'Success',
                 'msg' => "New User Has Been Created",

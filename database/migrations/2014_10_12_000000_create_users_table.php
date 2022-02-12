@@ -15,14 +15,13 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
-            $table->string('email')->nullable();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password')->nullable();
+            $table->string('name');
+            $table->string('email');
+            $table->string('password');
             /* As said - Each user will have only one single currency based wallet. */
-            $table->string('wallet_id')->nullable();
-            $table->string('currency')->nullable();
-            $table->bigInteger('current_balance')->nullable(); // x100
+            $table->string('wallet_id');
+            $table->string('currency');
+            $table->bigInteger('current_balance'); // x100
             $table->timestamps(); 
         });
     }

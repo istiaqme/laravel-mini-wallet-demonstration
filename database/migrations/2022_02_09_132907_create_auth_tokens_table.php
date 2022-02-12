@@ -16,9 +16,9 @@ class CreateAuthTokensTable extends Migration
         Schema::create('auth_tokens', function (Blueprint $table) { 
             $table->id();
             $table->string('ip_address', 45);
-            $table->integer('user_id')->nullable();
-            $table->string('token')->nullable();
-            $table->string('status')->nullable(); // "Active" or "Inactive"
+            $table->integer('user_id');
+            $table->string('token');
+            $table->string('status'); // "Active" or "Inactive"
             $table->timestamps(); 
         });
     }
