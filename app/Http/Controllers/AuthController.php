@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Interfaces\AuthServiceInterface;
 
-use App\Helpers\Validators\LoginValidator;
+use App\Http\Requests\LoginRequest;
 
 class AuthController extends Controller
 {
@@ -15,15 +15,7 @@ class AuthController extends Controller
         $this->authServiceInterface = $authServiceInterface;
     }
 
-    public function login (Request $request) {
-        $validation = LoginValidator::validateUserData($request);
-        if(!$validation["proceed"]){
-            return response()->json([
-                'type' => 'Error',
-                'msg' => $validation["msg"],
-                'data' => null
-            ], 200);
-        }
+    public function login (LoginRequest $request) {
         
         $checkLogin = $this->authServiceInterface->checkLogin([
             "email" => $request->email,

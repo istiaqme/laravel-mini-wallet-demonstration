@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Helpers\Validators\SignupValidator;
+
+use App\Http\Requests\SignupRequest;
 
 use App\Interfaces\UserServiceInterface;
 
@@ -17,16 +18,8 @@ class UserController extends Controller
         $this->userServiceInterface = $userServiceInterface;
     }
 
-    public function signup (Request $request ) {
-        $validation = SignupValidator::validateUserData($request);
+    public function signup (SignupRequest $request ) {
         
-        if(!$validation["proceed"]){ 
-            return response()->json([
-                'type' => 'Error',
-                'msg' => $validation["msg"],
-                'data' => null
-            ], 200);
-        }
 
         $newUser = $this->userServiceInterface->create([
             "name" => $request->name,
