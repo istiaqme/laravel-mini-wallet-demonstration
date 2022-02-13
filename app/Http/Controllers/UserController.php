@@ -19,6 +19,7 @@ class UserController extends Controller
 
     public function signup (Request $request ) {
         $validation = SignupValidator::validateUserData($request);
+        
         if(!$validation["proceed"]){ 
             return response()->json([
                 'type' => 'Error',
@@ -26,21 +27,28 @@ class UserController extends Controller
                 'data' => null
             ], 200);
         }
-        else {
-            $newUser = $this->userServiceInterface::create([
-                "name" => $request->name,
-                "email" => $request->email,
-                "password" => $request->password,
-                "currency" => $request->selectedCurrency
-            ]);
-            
 
+        $newUser = $this->userServiceInterface->create([
+            "name" => $request->name,
+            "email" => $request->email,
+            "password" => $request->password,
+            "currency" => $request->selectedCurrency
+        ]);
+
+        if($newUser["type"]==="Error"){
             return response()->json([
-                'type' => 'Success',
-                'msg' => "New User Has Been Created",
-                'data' => $newUser
+                'type' => 'Error',
+                'msg' => $newUser["data"]["msg"],
+                'data' => null
             ], 200);
         }
+        
+
+        return response()->json([
+            'type' => 'Success',
+            'msg' => "New User Has Been Created",
+            'data' => $newUser
+        ], 200);
         
     }
 }

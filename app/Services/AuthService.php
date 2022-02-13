@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Ramsey\Uuid\Uuid;
+
 use App\Interfaces\AuthServiceInterface;
 
 use App\Helpers\Utils;
@@ -16,18 +18,19 @@ class AuthService implements AuthServiceInterface
         @params: array
         @return: array
     */
-    public static function checkLogin (array $data) : array
+    public function checkLogin (array $data) : array
     {
-        $user = User::where('email', $data['email'])->get();
-        if(!count($user) == 1){
-            return [
-                "type" => "Error",
-                "data" => [
-                    "msg" => "User does not exist."
-                ]
-            ];
-        }
-        else {
+        try {
+            $user = User::where('email', $data['email'])->get();
+            if(!count($user) == 1){
+                return [
+                    "type" => "Error",
+                    "data" => [
+                        "msg" => "User does not exist."
+                    ]
+                ];
+            }
+            
             // check password
             if(hash("sha512", $data['password']) != $user[0]->password) {
                 return [
@@ -37,30 +40,41 @@ class AuthService implements AuthServiceInterface
                     ]
                 ];
             }
-            else {
-                // create session token
-                $newAuthToken = self::createAuthToken([
-                    "user_id" => $user[0]->id,
-                    "ip" => $data['ip']
-                ]);
+            
+            // create session token
+            $newAuthToken = $this->createAuthToken([
+                "user_id" => $user[0]->id,
+                "ip" => $data['ip']
+            ]);
 
+            if($newAuthToken["type"] === "Error"){
                 return [
-                    "type" => "Success",
+                    "type" => "Error",
                     "data" => [
-                        "name" => $user[0]->name,
-                        "email" => $user[0]->email,
-                        "user_id" => $user[0]->id,
-                        "wallet_id" => $user[0]->wallet_id,
-                        "auth_token" => $newAuthToken['data']->token
+                        "msg" => $newAuthToken["data"]["msg"]
                     ]
-                    ];
+                ];
             }
-        }
 
-        return [
-            "type" => "Success",
-            "data" => $newUser
-        ];
+            return [
+                "type" => "Success",
+                "data" => [
+                    "name" => $user[0]->name,
+                    "email" => $user[0]->email,
+                    "user_id" => $user[0]->id,
+                    "wallet_id" => $user[0]->wallet_id,
+                    "auth_token" => $newAuthToken['data']->token
+                ]
+            ];
+        }
+        catch(\Exception $e){
+            return [
+                "type" => "Error",
+                "data" => [
+                    "msg" => $e
+                ]
+            ];
+        }
     }
 
     /* 
@@ -68,26 +82,38 @@ class AuthService implements AuthServiceInterface
         @params: array
         @return: array
     */
-    public static function createAuthToken (array $data) : array {
-        $token = Utils::randomString(18).$data['user_id'].mt_rand(1000, 10000).Utils::randomString(10);
-        $newAuthToken = new AuthToken();
-        $newAuthToken->ip_address = $data['ip'];
-        $newAuthToken->user_id = $data['user_id'];
-        $newAuthToken->token = $token;
-        $newAuthToken->status = "Active";
-        $newAuthToken->save();
-        return [
-            "type" => "Success",
-            "data" => $newAuthToken
-        ];
+    private function createAuthToken (array $data) : array {
+        try {
+            $token = Uuid::uuid4()->toString();
+            $newAuthToken = new AuthToken();
+            $newAuthToken->ip_address = $data['ip'];
+            $newAuthToken->user_id = $data['user_id'];
+            $newAuthToken->token = $token;
+            $newAuthToken->status = "Active";
+            $newAuthToken->save();
+            return [
+                "type" => "Success",
+                "data" => $newAuthToken
+            ];
+        }
+        catch(\Exception $e){
+            return [
+                "type" => "Success",
+                "data" => [
+                    "msg" => $e
+                ]
+            ];
+        }
+        
     }
 
-    public static function logout (object $request) : array
+    public function logout (object $request) : array
     {
         try{
             $authToken = AuthToken::where('user_id', $request->header('userid'))
                 ->where('token', $request->header('authtoken'))
                 ->first();
+
             if($authToken){
                 $authToken->status = "Inactive";
                 $authToken->save();
@@ -96,12 +122,11 @@ class AuthService implements AuthServiceInterface
                     "data" => null
                 ];
             }
-            else {
-                return [
-                    "type" => "Success",
-                    "data" => null
-                ];
-            }
+
+            return [
+                "type" => "Success",
+                "data" => null
+            ];
         }
         catch(\Exception $e){
             return [
@@ -114,38 +139,15 @@ class AuthService implements AuthServiceInterface
         
     }
 
-    public static function authMiddleware (array $data) : array
+    public function authMiddleware (array $data) : array
     {
         try{
             // wildcard check
-            $authTokens = AuthToken::where('token', $data['token'])
+            $authToken = AuthToken::where('token', $data['token'])
                 ->where('user_id', $data['userId'])
-                ->where('status', 'Active')->get();
+                ->where('status', 'Active')->first();
 
-            if(count($authTokens) == 1) {
-                // user and wallet get validated here
-                $users = User::where('id', $data['userId'])
-                    ->where('wallet_id', $data['walletId'])
-                    ->get();
-
-                if(count($users) == 1) {
-                    return [
-                        "type" => "Success",
-                        "data" => [
-                            "user" => $users[0]
-                        ]
-                    ];
-                }
-                else {
-                    return [
-                        "type" => "Error",
-                        "data" => [
-                            "msg" => "User Not Found"
-                        ]
-                    ];
-                }
-            }
-            else {
+            if(!$authToken) {
                 return [
                     "type" => "Error",
                     "data" => [
@@ -153,6 +155,28 @@ class AuthService implements AuthServiceInterface
                     ]
                 ];
             }
+            
+            // user and wallet get validated here
+            $user = User::where('id', $data['userId'])
+            ->where('wallet_id', $data['walletId'])
+            ->first();
+
+            if(!$user) {
+                return [
+                    "type" => "Error",
+                    "data" => [
+                        "msg" => "User Not Found"
+                    ]
+                ];
+            }
+
+            return [
+                "type" => "Success",
+                "data" => [
+                    "user" => $user
+                ]
+            ];
+
         }
         catch(\Exception $e){
             return [

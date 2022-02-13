@@ -23,7 +23,7 @@ class NativeAuth
     public function handle(Request $request, Closure $next)
     {
         // wildcard check
-        $validate = $this->authServiceInterface::authMiddleware([
+        $validate = $this->authServiceInterface->authMiddleware([
             "token" => $request->header('authtoken'),
             "userId" => $request->header('userid'),
             "walletId" => $request->header('walletid'),
@@ -35,12 +35,11 @@ class NativeAuth
                 'data' => null
             ], 200);
         }
-        else {
-            // inject some global data in request object so that we can use in the future
-            $request->current_balance = $validate['data']['user']->current_balance;
-            $request->currency = $validate['data']['user']->currency;
-            return $next($request);
-        }
+        
+        // inject some global data in request object so that we can use in the future
+        $request->current_balance = $validate['data']['user']->current_balance;
+        $request->currency = $validate['data']['user']->currency;
+        return $next($request);
 
 
 

@@ -28,6 +28,7 @@ class CreateWalletTransactionsTable extends Migration
             $table->dateTime('received_at');
             $table->string('purpose');
             $table->bigInteger('amount_in_base_currency');
+            $table->string('status'); // Transaction status "Active" or "Inactive"
             $table->timestamps();
         });
     }

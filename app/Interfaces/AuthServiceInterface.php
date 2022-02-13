@@ -4,7 +4,7 @@ namespace App\Interfaces;
 
 interface AuthServiceInterface 
 {
-    public static function checkLogin(array $data) : array ;
-    public static function logout(object $request) : array ;
-    public static function authMiddleware(array $data) : array ;
+    public function checkLogin(array $data) : array ;
+    public function logout(object $request) : array ;
+    public function authMiddleware(array $data) : array ;
 }

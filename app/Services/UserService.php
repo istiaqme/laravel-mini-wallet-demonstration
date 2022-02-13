@@ -12,23 +12,33 @@ class UserService implements UserServiceInterface
         @params: array
         @return: array 
     */
-    public static function create (array $data) : array
+    public function create (array $data) : array
     {
-        $newUser = new User();
-        $newUser->name = $data['name'];
-        $newUser->email = $data['email'];
-        $newUser->password = hash("sha512", $data['password']); 
-        $newUser->currency = strtoupper($data['currency']);
-        $newUser->current_balance = 0.00;
-        $newUser->save();
-        $newUser = $newUser;
-        $newUser->wallet_id = $data['email'].'@'.$newUser->id.'@'.strtoupper($data['currency']);
-        $newUser->save();
+        try {
+            $newUser = new User();
+            $newUser->name = $data['name'];
+            $newUser->email = $data['email'];
+            $newUser->password = hash("sha512", $data['password']); 
+            $newUser->currency = strtoupper($data['currency']);
+            $newUser->current_balance = 0.00;
+            $newUser->save();
+            $newUser = $newUser;
+            $newUser->wallet_id = $data['email'].'@'.$newUser->id.'@'.strtoupper($data['currency']);
+            $newUser->save();
 
-        return [
-            "type" => "Success",
-            "data" => $newUser
-        ];
+            return [
+                "type" => "Success",
+                "data" => $newUser
+            ];
+        }
+        catch(\Exception $e){
+            return [
+                "type" => "Error",
+                "data" => [
+                    "msg" => $e
+                ]
+            ];
+        }
     }
 
 

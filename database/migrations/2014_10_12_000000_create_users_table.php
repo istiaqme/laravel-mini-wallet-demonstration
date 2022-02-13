@@ -19,7 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('email');
             $table->string('password');
             /* As said - Each user will have only one single currency based wallet. */
-            $table->string('wallet_id');
+            $table->string('wallet_id')->nullable();
             $table->string('currency');
             $table->bigInteger('current_balance'); // x100
             $table->timestamps(); 
