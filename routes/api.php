@@ -26,6 +26,9 @@ Route::middleware(['nativeAPI'])->group(function () {
     /* I don't use route resources unless it's binded by the SRS  */
     Route::post('/wallet/sendMoney', [WalletController::class, 'sendMoney']);
     Route::get('/wallet/transactions/{walletId}', [WalletController::class, 'transactions']);
+    Route::get('/wallet/usersWhoUsedMostConversions', [WalletController::class, 'usersWhoUsedMostConversions']);
+    Route::get('/wallet/totalAmountConvertedByAUser/{userId}', [WalletController::class, 'totalAmountConvertedByAUser']);
+    Route::get('/wallet/thirdHighestAmountofTransactionsByAUser/{userId}', [WalletController::class, 'thirdHighestAmountofTransactionsByAUser']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 });
 

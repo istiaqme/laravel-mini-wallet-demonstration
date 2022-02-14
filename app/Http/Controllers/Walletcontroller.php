@@ -44,6 +44,33 @@ class Walletcontroller extends Controller
         ], 200);
     }
 
+    public function usersWhoUsedMostConversions (Request $request) {
+        $users = $this->walletServiceInterface::userUsedMostConversion();
+        return response()->json([
+            'type' => 'Success',
+            'msg' => "List Loaded.",
+            'data' => $users
+        ], 200);
+    }
+
+    public function totalAmountConvertedByAUser (Request $request) {
+        $result = $this->walletServiceInterface::totalAmountConvertedByAUser($request->userId);
+        return response()->json([
+            'type' => 'Success',
+            'msg' => "List Loaded.",
+            'data' => $result
+        ], 200);
+    }
+
+    public function thirdHighestAmountofTransactionsByAUser (Request $request) {
+        $result = $this->walletServiceInterface::thirdHighestAmountofTransactionsByAUser($request->userId);
+        return response()->json([
+            'type' => 'Success',
+            'msg' => "List Loaded.",
+            'data' => $result
+        ], 200);
+    }
+
 
     
 }

@@ -8,6 +8,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use App\Helpers\ExchangeApi;
 
+use Illuminate\Support\Facades\DB;
+
 class WalletService implements WalletServiceInterface 
 {
     /* 
@@ -191,6 +193,39 @@ class WalletService implements WalletServiceInterface
         ];
     }
 
+    public function userUsedMostConversion() : object {
+        $users = WalletTransaction::select('from_wallet_id', \DB::raw("count(id) as total_transactions"))->with('sender')->where('status', 'active')->groupBy('from_wallet_id')->get();
+        return $users;
+    }
+
+    public function totalAmountConvertedByAUser(int $userId) : object {
+
+        $user = User::with(['senderTransactions' => function($query){
+            $query->select(\DB::raw("SUM(amount_in_base_currency) as total_amount, from_wallet_id"))->where('status', 'Active');
+        }])->where('id', $userId)->first();
+        return $user;
+    }
+
+    public function thirdHighestAmountofTransactionsByAUser(int $userId) : object {
+
+        $subQuery = DB::table('wallet_transactions')
+        ->selectRaw('amount_in_base_currency, from_wallet_id')
+        ->orderBy('amount_in_base_currency', 'desc')
+        ->limit(3)
+        ->toSql();
+
+        $transaction = DB::table(DB::raw('('.$subQuery.') as transactions'))
+        ->selectRaw('users.id, users.name, users.email, amount_in_base_currency')
+        ->join('users', 'users.wallet_id', '=', 'transactions.from_wallet_id')
+        ->orderBy('amount_in_base_currency')
+        ->limit(1)
+        ->first();
+
+        return $transaction;
+    }
+
+
+  
 
 
 

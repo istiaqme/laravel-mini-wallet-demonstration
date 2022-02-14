@@ -39,4 +39,13 @@ class User extends Model
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+
+    public function senderTransactions () {
+        return $this->hasMany(WalletTransaction::class, 'from_wallet_id', 'wallet_id');
+    }
+
+    public function receiverTransactions () {
+        return $this->hasMany(WalletTransaction::class, 'to_wallet_id', 'wallet_id');
+    }
 }

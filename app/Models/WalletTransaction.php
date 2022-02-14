@@ -23,4 +23,14 @@ class WalletTransaction extends Model
         'purpose',
         'amount_in_base_currency'
     ];
+
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'from_wallet_id', 'wallet_id');
+    }
+
+    public function receiver()
+    {
+        return $this->belongsTo(User::class, 'to_wallet_id', 'wallet_id');
+    }
 }
