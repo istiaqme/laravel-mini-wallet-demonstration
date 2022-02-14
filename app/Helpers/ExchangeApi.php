@@ -2,7 +2,7 @@
 
 namespace App\Helpers;
 
-class ExchangeApi 
+Class ExchangeApi 
 {
 
     /* 

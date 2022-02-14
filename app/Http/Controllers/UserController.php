@@ -19,7 +19,6 @@ class UserController extends Controller
     }
 
     public function signup (SignupRequest $request ) {
-        
 
         $newUser = $this->userServiceInterface->create([
             "name" => $request->name,
@@ -28,15 +27,7 @@ class UserController extends Controller
             "currency" => $request->selectedCurrency
         ]);
 
-        if($newUser["type"]==="Error"){
-            return response()->json([
-                'type' => 'Error',
-                'msg' => $newUser["data"]["msg"],
-                'data' => null
-            ], 200);
-        }
         
-
         return response()->json([
             'type' => 'Success',
             'msg' => "New User Has Been Created",

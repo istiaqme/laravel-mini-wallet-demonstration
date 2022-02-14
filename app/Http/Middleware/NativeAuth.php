@@ -28,20 +28,11 @@ class NativeAuth
             "userId" => $request->header('userid'),
             "walletId" => $request->header('walletid'),
         ]);
-        if($validate['type'] == "Error"){
-            return response()->json([
-                'type' => 'Error',
-                'msg' => 'Authorization Denied',
-                'data' => null
-            ], 200);
-        }
         
         // inject some global data in request object so that we can use in the future
-        $request->current_balance = $validate['data']['user']->current_balance;
-        $request->currency = $validate['data']['user']->currency;
+        $request->current_balance = $validate->current_balance;
+        $request->currency = $validate->currency;
         return $next($request);
-
-
 
 
     }

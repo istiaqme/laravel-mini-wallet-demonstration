@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Interfaces\AuthServiceInterface;
 
+
 use App\Http\Requests\LoginRequest;
 
 class AuthController extends Controller
@@ -23,18 +24,11 @@ class AuthController extends Controller
             "ip" => $request->ip()
         ]);
 
-        if($checkLogin['type'] === "Error"){
-            return response()->json([
-                'type' => 'Error',
-                'msg' => $checkLogin['data']['msg'],
-                'data' => null
-            ], 200);
-        }
         
         return response()->json([
             'type' => 'Success',
             'msg' => "Succesfully Logged In.",
-            'data' => $checkLogin['data']
+            'data' => $checkLogin
         ], 200);
 
 
@@ -44,19 +38,13 @@ class AuthController extends Controller
     public function logout (Request $request) {
         // required data already validated by middleware
         $logout = $this->authServiceInterface->logout($request);
-        
-        if($logout['type'] === "Error"){
-            return response()->json([
-                'type' => 'Error',
-                'msg' => $logout['data']['msg'],
-                'data' => null
-            ], 200);
-        }
-        
+
         return response()->json([
             'type' => 'Success',
             'msg' => "Succesfully Loggedout.",
-            'data' => $logout['data']
+            'data' => null
         ], 200);
+
     }
+
 }
